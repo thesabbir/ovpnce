@@ -14,7 +14,7 @@ def ReadFile(file_name):
         return text
     except IOError:
         raise Exception('Unable to open configaration file')
-       
+
 
 def Extract(client):
     print "Extracting config file..."
@@ -22,15 +22,29 @@ def Extract(client):
     cert = re.search('<cert>(.*)<\/cert>', client, flags=re.S ).group(1)
     key = re.search('<key>(.*)<\/key>', client, flags=re.S ).group(1)
     ta = re.search('<tls-auth>(.*)<\/tls-auth>', client, flags=re.S ).group(1)
-    files = [ca, cert, key, ta]
+    ovpn = re.sub('<cert>(.*)<\/cert>|<ca>(.*)<\/ca>|<key>(.*)<\/key>|<tls-auth>(.*)<\/tls-auth>', '', client, flags=re.S)
+    ovpn = re.sub('key-direction\s1', 'ca ca.crt\ncert client.crt\nkey client.key\ntls-auth\nta.key 1', ovpn)
+    files = {
+    'ca.crt' : ca,
+    'ta.key' : ta,
+    'client.crt' : cert,
+    'client.key' : key,
+    'client.ovpn' : ovpn
+    }
     return files
-    
+
 
 def WriteFiles(files):
     print "Writing configarations..."
+
+    os.makedirs('openvpn_config', mode=0755)
+    os.chdir('openvpn_config')
     for file in files:
-        print file, '\n'
-    return files
+        print 'Writing "%s"...' % file
+        temp_file = open(file, 'w')
+        temp_file.write(files[file])
+        temp_file.close()
+
 
 try:
     client = ReadFile(config_file)
@@ -39,5 +53,3 @@ try:
 
 except Exception, e:
     print "Error : ", e
-
-
