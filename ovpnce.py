@@ -23,7 +23,7 @@ def Extract(client):
     key = re.search('<key>(.*)<\/key>', client, flags=re.S ).group(1)
     ta = re.search('<tls-auth>(.*)<\/tls-auth>', client, flags=re.S ).group(1)
     ovpn = re.sub('<cert>(.*)<\/cert>|<ca>(.*)<\/ca>|<key>(.*)<\/key>|<tls-auth>(.*)<\/tls-auth>', '', client, flags=re.S)
-    ovpn = re.sub('key-direction\s1', 'ca ca.crt\ncert client.crt\nkey client.key\ntls-auth\nta.key 1', ovpn)
+    ovpn = re.sub('key-direction\s1', 'ca ca.crt\ncert client.crt\nkey client.key\ntls-auth ta.key 1', ovpn)
     files = {
     'ca.crt' : ca,
     'ta.key' : ta,
